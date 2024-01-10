@@ -1,6 +1,7 @@
 package supplier_controller
 
 import (
+	"fmt"
 	"net/http"
 	"rest-api/database"
 	"rest-api/entity"
@@ -241,36 +242,30 @@ func SellingArea(ctx *gin.Context)  {
 		Latitude  : &sellingAreaRequest.Latitude,
 	}
 
-	if errDB := database.DB.Table("store_selling_areas").Create(&sellingArea).Error; errDB != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"message": errDB.Error(),
-		})
-		return
+	existSellingArea := new(model.StoreSellingArea)
+	if database.DB.Table("store_selling_areas").Where("store_id = ?", &sellingArea.StoreID).Find(&existSellingArea); existSellingArea.ID != nil {
+		fmt.Print("12131233")
+		if errUpdateData := database.DB.Table("store_selling_areas").Where("store_id = ?", &sellingArea.StoreID).Updates(&sellingArea).Error; errUpdateData != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": errUpdateData.Error(),
+			})
+			return
+		}
+
+		sellingArea.ID = existSellingArea.ID
+	} else {
+		fmt.Print("123")
+		if errDB := database.DB.Table("store_selling_areas").Create(&sellingArea).Error; errDB != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": errDB.Error(),
+			})
+			return
+		}
 	}
 
 	ctx.JSON(200, gin.H{
 		"message": "Success",
 		"data"  : sellingArea,
-	})
-
-	return
-}
-
-func GetProduct(ctx *gin.Context)  {
-
-	product := new([]model.Product)
-
-	err := database.DB.Table("products").Find(&product).Error
-
-	if err != nil {
-		ctx.AbortWithStatusJSON(500, gin.H{
-			"message": "internal server error",
-		})
-		return
-	}
-
-	ctx.JSON(200, gin.H{
-		"data": product,
 	})
 
 	return
@@ -300,7 +295,7 @@ func CreateProduct(ctx *gin.Context)  {
 		}
 	}
 
-	productRequest := new(entity.CreateProductRequest)
+	productRequest := new(entity.ProductRequest)
 
 	if errReq := ctx.ShouldBind(&productRequest); errReq != nil {
 
@@ -311,45 +306,64 @@ func CreateProduct(ctx *gin.Context)  {
 		return
 	}
 
-	products := productRequest.Product
-	
-	productData := make([]model.StoreProduct, 0)
+	if productRequest.ID != 0 {
 
-	for _, product := range products {
-		productExist := new(model.StoreProduct)
-		if database.DB.Table("store_products").Where("store_id = ?", store.ID).Where("product_id = ?", product.ID).Find(&productExist); productExist.ID != nil {
+		existProduct := new(model.Product)
+		if database.DB.Table("products").Where("id = ?", productRequest.ID).Find(&existProduct); existProduct.ID == nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"message": "Product Exist",
+				"message": "Product not found",
 			})
 			return
 		}
 
-		newProduct := model.StoreProduct{
-			StoreID:      store.ID,
-			ProductID:    &product.ID,
-			Price:        &product.Price,
-			IsPurchased:  &product.IsPurchased,
+		productData := model.Product{
+			StoreID: store.ID,
+			Name : &productRequest.Name,
+			Price: &productRequest.Price,
+			IsPurchased: &productRequest.IsPurchased,
+			ParentID: existProduct.ID,
 		}
 
-		productData = append(productData, newProduct)
-	}
+		if errDB := database.DB.Table("products").Create(&productData).Error; errDB != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": errDB.Error(),
+			})
+			return
+		}
 
-	if errDB := database.DB.Table("store_products").Create(&productData).Error; errDB != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"message": errDB.Error(),
+		ctx.JSON(200, gin.H{
+			"data": productData,
 		})
+	
+		return
+
+	} else {
+
+		productData := model.Product{
+			StoreID: store.ID,
+			Name : &productRequest.Name,
+			Price: &productRequest.Price,
+			IsPurchased: &productRequest.IsPurchased,
+		}
+	
+		if errDB := database.DB.Table("products").Create(&productData).Error; errDB != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": errDB.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(200, gin.H{
+			"data": productData,
+		})
+	
 		return
 	}
 
-	ctx.JSON(200, gin.H{
-		"data": productData,
-	})
-
-	return
 }
 
-func ListProduct(ctx *gin.Context)  {
-	
+func GetProduct(ctx *gin.Context)  {
+
 	decodeToken := ctx.MustGet("decode_token").(jwt.MapClaims)
 	UserMiddleware, errUserMiddleware := utils.UserMid(decodeToken)
 
@@ -372,10 +386,19 @@ func ListProduct(ctx *gin.Context)  {
 		}
 	}
 
-	storeProduct := new([]model.StoreProduct)
+	product := new([]model.Product)
+	errProduct := database.DB.Table("products").Where("store_id = ?",store.ID).Find(&product).Error
 
-	err := database.DB.Preload("Product").Table("store_products").Where("store_id = ?", store.ID).Find(&storeProduct).Error
-	if err != nil {
+	if errProduct != nil {
+		ctx.AbortWithStatusJSON(500, gin.H{
+			"message": "internal server error",
+		})
+		return
+	}
+
+	otherProduct := new([]model.Product)
+	errOtherProduct := database.DB.Preload("Store.Supplier").Table("products").Where("store_id != ?",store.ID).Find(&otherProduct).Error
+	if errOtherProduct != nil {
 		ctx.AbortWithStatusJSON(500, gin.H{
 			"message": "internal server error",
 		})
@@ -383,7 +406,8 @@ func ListProduct(ctx *gin.Context)  {
 	}
 
 	ctx.JSON(200, gin.H{
-		"data": storeProduct,
+		"product_store": product,
+		"product_other_store": otherProduct,
 	})
 
 	return

@@ -31,13 +31,10 @@ type (
 		Longitude  float64 `json:"longitude" form:"longitude" binding:"required"`
 	}
 
-	CreateProductRequest struct {
-		Product []ProductRequest `json:"products" form:"products" binding:"required"`
-	}
-
 	ProductRequest struct {
-		ID          uint64 `json:"id" form:"id" binding:"required"`
+		ID          uint64 `json:"id" form:"id"`
+		Name     	string `json:"name" form:"name"`
 		Price       int64  `json:"price" form:"price" binding:"required"`
-		IsPurchased bool   `json:"is_purchased" form:"is_purchased" binding:"required"`
+		IsPurchased bool   `json:"is_purchased" form:"is_purchased"`
 	}
 )

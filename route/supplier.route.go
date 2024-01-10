@@ -17,7 +17,6 @@ func SupplierRoute(app *gin.RouterGroup) {
 	supplierRoute := route.Group("/", middleware.AuthMiddleware)
 	supplierRoute.POST("/store", supplier_controller.RegisterStore)
 	supplierRoute.POST("/store-selling-are", supplier_controller.SellingArea)
-	supplierRoute.GET("/product", supplier_controller.GetProduct)
 	supplierRoute.POST("/product", supplier_controller.CreateProduct)
-	supplierRoute.GET("/product-list", supplier_controller.ListProduct)
+	supplierRoute.GET("/product", supplier_controller.GetProduct)
 }

@@ -21,4 +21,8 @@ type (
 		Latitude   float64 `json:"latitude" form:"latitude" binding:"required"`
 		Longitude  float64 `json:"longitude" form:"longitude" binding:"required"`
 	}
+
+	ListProductUserRequest struct {
+		AddressID string  `json:"address_id" form:"address_id" binding:"required"`
+	}
 )

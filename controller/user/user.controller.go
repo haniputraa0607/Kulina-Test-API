@@ -1,6 +1,7 @@
 package user_controller
 
 import (
+	"fmt"
 	"net/http"
 	"rest-api/database"
 	"rest-api/entity"
@@ -136,7 +137,6 @@ func Login(ctx *gin.Context) {
 
 func Address(ctx *gin.Context)  {
 	
-	
 	decodeToken := ctx.MustGet("decode_token").(jwt.MapClaims)
 	UserMiddleware, errUserMiddleware := utils.UserMid(decodeToken)
 
@@ -180,6 +180,83 @@ func Address(ctx *gin.Context)  {
 	ctx.JSON(200, gin.H{
 		"message": "Success",
 		"data"  : address,
+	})
+
+	return
+}
+
+func GetAddress(ctx *gin.Context)  {
+	
+	decodeToken := ctx.MustGet("decode_token").(jwt.MapClaims)
+	UserMiddleware, errUserMiddleware := utils.UserMid(decodeToken)
+
+	if errUserMiddleware {
+
+		ctx.AbortWithStatusJSON(400, gin.H{
+			"message": "Error",
+		})
+
+		return
+	}
+
+	address := new([]model.Address)
+
+	if errUser := database.DB.Table("addresses").Where("user_id = ?", UserMiddleware.ID).Find(&address).Error; errUser != nil {
+		ctx.AbortWithStatusJSON(404, gin.H{
+			"message": "Error",
+		})
+
+		return
+	}
+
+	ctx.JSON(200, gin.H{
+		"data": address,
+	})
+
+	return
+}
+
+func GetProduct(ctx *gin.Context)  {
+	
+	listProductUserRequest := new(entity.ListProductUserRequest)
+
+	if errReq := ctx.ShouldBind(&listProductUserRequest); errReq != nil {
+
+		ctx.AbortWithStatusJSON(400, gin.H{
+			"message": errReq.Error(),
+		})
+
+		return
+	}
+
+	address := new(model.Address)
+
+	if errUser := database.DB.Table("addresses").Where("id = ?", listProductUserRequest.AddressID).Find(&address).Error; errUser != nil {
+		ctx.AbortWithStatusJSON(404, gin.H{
+			"message": "Error",
+		})
+
+		return
+	}
+
+	products := new([]model.Product)
+	haversine := fmt.Sprintf(
+        "6371 * acos(cos(radians(%f)) * cos(radians(Latitude)) * cos(radians(Longitude) - radians(%f)) + sin(radians(%f)) * sin(radians(Latitude)))",
+        *address.Latitude,
+        *address.Longitude,
+        *address.Latitude,
+    )
+
+	if err := database.DB.Joins("JOIN store_selling_areas ON products.store_id = store_selling_areas.store_id").Select("products.*, " + haversine + " AS distance").Order("name").Order("distance").Table("products").Find(&products).Error; err != nil {
+        ctx.AbortWithStatusJSON(404, gin.H{
+			"message": "Error",
+		})
+
+		return
+    }
+
+	ctx.JSON(200, gin.H{
+		"data": products,
 	})
 
 	return

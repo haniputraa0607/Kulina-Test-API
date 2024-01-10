@@ -16,6 +16,8 @@ func UserRoute(app *gin.RouterGroup) {
 
 	userRoute := route.Group("/", middleware.AuthMiddleware)
 	userRoute.POST("/address", user_controller.Address)
+	userRoute.GET("/address", user_controller.GetAddress)
+	userRoute.POST("/product", user_controller.GetProduct)
 
 
 
