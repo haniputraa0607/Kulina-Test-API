@@ -1,6 +1,8 @@
 package entity
 
-import "time"
+import (
+	"time"
+)
 
 type (
 	RegisterUserRequest struct {
@@ -39,11 +41,36 @@ type (
 	}
 
 	OrderResponse struct {
-		ID           uint64
-		Address      string
-		TotalPrice   int64
-		OrderDate    *time.Time
-		PaidDate     *time.Time
-		EstimateDate *time.Time
+		ID             uint64
+		Address        string
+		TotalPrice     int64
+		IsPaid         bool
+		IsCancelled    bool
+		CancelDelivery bool
+		Products       []ProductResponse
+		OrderDate      *time.Time
+		PaidDate       *time.Time
+		EstimateDate   *time.Time
+	}
+
+	ProductResponse struct {
+		ID              uint64
+		OrderResponseId uint64
+		Name            string
+		Quantity        int64
+		Price           int64
+		TotalPrice      int64
+	}
+
+	CancelOrderRequest struct {
+		ID uint64 `json:"id" form:"id" binding:"required"`
+	}
+	PayOrderRequest struct {
+		ID    uint64 `json:"id" form:"id" binding:"required"`
+		Price int64  `json:"price" form:"price" binding:"required"`
+	}
+	CancelDeliveryRequest struct {
+		ID     uint64 `json:"id" form:"id" binding:"required"`
+		Reason string `json:"reason" form:"reason" binding:"required"`
 	}
 )

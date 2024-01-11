@@ -317,7 +317,7 @@ func CreateOrder(ctx *gin.Context) {
 
 			if product.IsPurchased != nil && *product.IsPurchased == true {
 				existOrder := new(model.Order)
-				if tx.Joins("JOIN order_products ON orders.id = order_products.order_id").Table("orders").Where("user_id = ?", UserMiddleware.ID).Where("DATE(order_date) = ?", time.Now().UTC().Format("2006-01-02")).Where("order_products.product_id = ?", product.ID).Find(&existOrder); existOrder.ID != nil {
+				if tx.Joins("JOIN order_products ON orders.id = order_products.order_id").Table("orders").Where("user_id = ?", UserMiddleware.ID).Where("DATE(order_date) = ?", time.Now().UTC().Format("2006-01-02")).Where("orders.is_cancelled = 0").Where("order_products.product_id = ?", product.ID).Find(&existOrder); existOrder.ID != nil {
 					return errors.New("Product one-time purchase")
 				}
 			}
@@ -397,10 +397,221 @@ func GetOrder(ctx *gin.Context) {
 		return
 	}
 
+	unpaid := make([]entity.OrderResponse, 0)
+	cancelled := make([]entity.OrderResponse, 0)
+	waiting := make([]entity.OrderResponse, 0)
+	received := make([]entity.OrderResponse, 0)
+	cancelDelivery := make([]entity.OrderResponse, 0)
+
+	for _, order := range *orderResponse {
+
+		products := new([]entity.ProductResponse)
+		if err := database.DB.
+			Joins("JOIN products ON order_products.product_id = products.id").
+			Select("order_products.*, products.name AS name").
+			Where("order_id = ?", order.ID).
+			Table("order_products").
+			Find(&products).Error; err != nil {
+			ctx.AbortWithStatusJSON(404, gin.H{
+				"message": err.Error(),
+			})
+
+			return
+		}
+
+		order.Products = *products
+
+		if order.PaidDate == nil && !order.IsCancelled {
+			unpaid = append(unpaid, order)
+		} else if order.IsCancelled {
+			cancelled = append(cancelled, order)
+		}
+
+		currentTime := time.Now()
+		if order.IsPaid && currentTime.After(*order.EstimateDate) && !order.CancelDelivery {
+			received = append(received, order)
+		} else if order.IsPaid && currentTime.Before(*order.EstimateDate) && !order.CancelDelivery {
+			waiting = append(waiting, order)
+		} else if order.CancelDelivery {
+			cancelDelivery = append(cancelDelivery, order)
+		}
+	}
+
 	ctx.JSON(200, gin.H{
 		"message": "Success",
-		"data":    orderResponse,
+		"data": gin.H{
+			"unpaid":          unpaid,
+			"cancelled":       cancelled,
+			"waiting":         waiting,
+			"received":        received,
+			"cancel_delivery": cancelDelivery,
+		},
 	})
 
 	return
+}
+
+func CancelOrder(ctx *gin.Context) {
+
+	cancelOrder := new(entity.CancelOrderRequest)
+
+	if errReq := ctx.ShouldBind(&cancelOrder); errReq != nil {
+
+		ctx.AbortWithStatusJSON(400, gin.H{
+			"message": errReq.Error(),
+		})
+
+		return
+	}
+
+	order := new(model.Order)
+	if database.DB.Table("orders").Where("id = ?", cancelOrder.ID).Find(&order); order.ID == nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "Order not found",
+		})
+		return
+	}
+
+	if order.IsPaid != nil && *order.IsPaid == true {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "Order has been paid",
+		})
+		return
+	}
+
+	newValue := true
+	order.IsCancelled = &newValue
+	if errUpdateData := database.DB.Table("orders").Where("id = ?", cancelOrder.ID).Updates(&order).Error; errUpdateData != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": errUpdateData.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(200, gin.H{
+		"message": "Success",
+	})
+
+	return
+
+}
+
+func PayOrder(ctx *gin.Context) {
+
+	payOrder := new(entity.PayOrderRequest)
+
+	if errReq := ctx.ShouldBind(&payOrder); errReq != nil {
+
+		ctx.AbortWithStatusJSON(400, gin.H{
+			"message": errReq.Error(),
+		})
+
+		return
+	}
+
+	order := new(model.Order)
+	if database.DB.Table("orders").Where("id = ?", payOrder.ID).Find(&order); order.ID == nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "Order not found",
+		})
+		return
+	}
+
+	if order.IsCancelled != nil && *order.IsCancelled == true {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "Order has been cancelled",
+		})
+		return
+	}
+
+	if *order.TotalPrice > payOrder.Price {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "Not enough",
+		})
+		return
+	}
+
+	newValue := true
+	currentTime := time.Now()
+	today5pm := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), 17, 0, 0, 0, currentTime.Location())
+	var deliveryDate time.Time
+	if currentTime.After(today5pm) {
+		// Get the date for tomorrow at 7 am
+		deliveryDate = time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day()+4, 17, 0, 0, 0, currentTime.Location())
+	} else {
+		deliveryDate = time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day()+3, 17, 0, 0, 0, currentTime.Location())
+	}
+
+	order.IsPaid = &newValue
+	order.PaidDate = &currentTime
+	order.EstimateDate = &deliveryDate
+
+	fmt.Print(deliveryDate)
+
+	if errUpdateData := database.DB.Table("orders").Where("id = ?", payOrder.ID).Updates(&order).Error; errUpdateData != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": errUpdateData.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(200, gin.H{
+		"message": "Success",
+	})
+
+	return
+}
+
+func CancelDelivery(ctx *gin.Context) {
+
+	cancelDelivery := new(entity.CancelDeliveryRequest)
+
+	if errReq := ctx.ShouldBind(&cancelDelivery); errReq != nil {
+
+		ctx.AbortWithStatusJSON(400, gin.H{
+			"message": errReq.Error(),
+		})
+
+		return
+	}
+
+	order := new(model.Order)
+	if database.DB.Table("orders").Where("id = ?", cancelDelivery.ID).Find(&order); order.ID == nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "Order not found",
+		})
+		return
+	}
+
+	if order.IsPaid != nil && *order.IsPaid != true {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "Order unpaid",
+		})
+		return
+	}
+
+	if order.CancelDelivery != nil && *order.CancelDelivery == true {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "Already cancelled delivery",
+		})
+		return
+	}
+
+	newValue := true
+	order.CancelDelivery = &newValue
+	order.CancelReason = &cancelDelivery.Reason
+
+	if errUpdateData := database.DB.Table("orders").Where("id = ?", cancelDelivery.ID).Updates(&order).Error; errUpdateData != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": errUpdateData.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(200, gin.H{
+		"message": "Success",
+	})
+
+	return
+
 }

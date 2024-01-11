@@ -3,19 +3,22 @@ package model
 import "time"
 
 type Order struct {
-	ID            *uint64 `gorm:"primary_key:auto_increment" json:"id"`
-	UserID        *uint64
-	User          *User `gorm:"foreignKey:UserID"`
-	UserAddressID *uint64
-	UserAddress   *Address        `gorm:"foreignKey:UserAddressID"`
-	TotalPrice    *int64          `gorm:"type:integer" json:"total_price"`
-	IsPaid        *bool           `gorm:"type:boolean;default:false" json:"is_paid"`
-	OrderDate     *time.Time      `json:"-"`
-	PaidDate      *time.Time      `json:"-"`
-	EstimateDate  *time.Time      `json:"-"`
-	OrderProduct  *[]OrderProduct `json:"order_products,omitempty"`
-	CreatedAt     *time.Time      `json:"-"`
-	UpdatedAt     *time.Time      `json:"-"`
+	ID             *uint64 `gorm:"primary_key:auto_increment" json:"id"`
+	UserID         *uint64
+	User           *User `gorm:"foreignKey:UserID"`
+	UserAddressID  *uint64
+	UserAddress    *Address        `gorm:"foreignKey:UserAddressID"`
+	TotalPrice     *int64          `gorm:"type:integer" json:"total_price"`
+	IsPaid         *bool           `gorm:"type:boolean;default:false" json:"is_paid"`
+	IsCancelled    *bool           `gorm:"type:boolean;default:false" json:"is_cancelled"`
+	CancelDelivery *bool           `gorm:"type:boolean;default:false" json:"cancel_delivery"`
+	CancelReason   *string         `gorm:"type:text" json:"cancel_reason"`
+	OrderDate      *time.Time      `json:"-"`
+	PaidDate       *time.Time      `json:"-"`
+	EstimateDate   *time.Time      `json:"-"`
+	OrderProduct   *[]OrderProduct `json:"order_products,omitempty"`
+	CreatedAt      *time.Time      `json:"-"`
+	UpdatedAt      *time.Time      `json:"-"`
 }
 
 type OrderProduct struct {

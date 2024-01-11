@@ -1,6 +1,8 @@
 package main
 
-import "rest-api/app"
+import (
+	"rest-api/app"
+)
 
 func main() {
 

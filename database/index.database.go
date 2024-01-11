@@ -24,8 +24,8 @@ func ConnectDatabase() {
 	}
 
 	DB.AutoMigrate(
-		&model.User{}, 
-		&model.Address{}, 
+		&model.User{},
+		&model.Address{},
 		&model.Supplier{},
 		&model.Store{},
 		&model.StoreSellingArea{},
