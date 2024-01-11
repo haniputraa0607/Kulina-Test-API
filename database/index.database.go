@@ -15,7 +15,7 @@ func ConnectDatabase() {
 
 	var ConnectionError error
 
-	dsnMysql := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", "root", "12345678", "127.0.0.1", "3306", "kulina_test")
+	dsnMysql := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", "root", "", "127.0.0.1", "3306", "kulina_test")
 
 	DB, ConnectionError = gorm.Open(mysql.Open(dsnMysql), &gorm.Config{})
 
@@ -30,6 +30,8 @@ func ConnectDatabase() {
 		&model.Store{},
 		&model.StoreSellingArea{},
 		&model.Product{},
+		&model.Order{},
+		&model.OrderProduct{},
 	)
 
 	log.Println("Connect database")

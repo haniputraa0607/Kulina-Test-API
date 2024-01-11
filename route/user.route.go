@@ -18,7 +18,7 @@ func UserRoute(app *gin.RouterGroup) {
 	userRoute.POST("/address", user_controller.Address)
 	userRoute.GET("/address", user_controller.GetAddress)
 	userRoute.POST("/product", user_controller.GetProduct)
-
-
+	userRoute.POST("/order", user_controller.CreateOrder)
+	userRoute.GET("/order", user_controller.GetOrder)
 
 }

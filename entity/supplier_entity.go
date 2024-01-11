@@ -33,7 +33,7 @@ type (
 
 	ProductRequest struct {
 		ID          uint64 `json:"id" form:"id"`
-		Name     	string `json:"name" form:"name"`
+		Name        string `json:"name" form:"name"`
 		Price       int64  `json:"price" form:"price" binding:"required"`
 		IsPurchased bool   `json:"is_purchased" form:"is_purchased"`
 	}

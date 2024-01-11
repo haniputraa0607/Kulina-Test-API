@@ -1,5 +1,7 @@
 package entity
 
+import "time"
+
 type (
 	RegisterUserRequest struct {
 		Email    string `json:"email" form:"email" binding:"required,email"`
@@ -23,6 +25,25 @@ type (
 	}
 
 	ListProductUserRequest struct {
-		AddressID string  `json:"address_id" form:"address_id" binding:"required"`
+		AddressID uint64 `json:"address_id" form:"address_id" binding:"required"`
+	}
+
+	OrderRequest struct {
+		AddressID uint64                `json:"address_id" form:"address_id" binding:"required"`
+		Products  []OrderProductRequest `json:"products" form:"products" binding:"required"`
+	}
+
+	OrderProductRequest struct {
+		ID       uint64 `json:"id" form:"id" binding:"required"`
+		Quantity int64  `json:"qty" form:"qty" binding:"required"`
+	}
+
+	OrderResponse struct {
+		ID           uint64
+		Address      string
+		TotalPrice   int64
+		OrderDate    *time.Time
+		PaidDate     *time.Time
+		EstimateDate *time.Time
 	}
 )
