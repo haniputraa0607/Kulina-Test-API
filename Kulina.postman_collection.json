@@ -1,0 +1,738 @@
+{
+	"info": {
+		"_postman_id": "ebbfd3bb-6306-4201-b789-eff49986560a",
+		"name": "Kulina",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "31643121",
+		"_collection_link": "https://grey-sunset-383883.postman.co/workspace/Kulina~6556ca7c-fb55-44b5-8f1c-fed0dbb233b0/collection/31643121-ebbfd3bb-6306-4201-b789-eff49986560a?action=share&source=collection_link&creator=31643121"
+	},
+	"item": [
+		{
+			"name": "Userr",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData=JSON.parse(responseBody);\r",
+									"pm.environment.set(\"token_user\", jsonData.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\" : \"hanif@gmail.com\",\r\n    \"name\" : \"hanif\",\r\n    \"password\" : \"12345\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/api/user/register",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData=JSON.parse(responseBody);\r",
+									"pm.environment.set(\"token_user\", jsonData.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "hanif@gmail.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "12345",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/api/user/login",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Address",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_user}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "postal_code",
+									"value": "56512",
+									"type": "text"
+								},
+								{
+									"key": "city",
+									"value": "Magelang",
+									"type": "text"
+								},
+								{
+									"key": "province",
+									"value": "Jawa Tengah",
+									"type": "text"
+								},
+								{
+									"key": "detail",
+									"value": "Santan 1/12 Pabelan Mungkid Magelang",
+									"type": "text"
+								},
+								{
+									"key": "latitude",
+									"value": "-7.574327",
+									"type": "text"
+								},
+								{
+									"key": "longitude",
+									"value": "110.257412",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/api/user/address",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"address"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Address",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_user}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{api}}/api/user/address",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"address"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_user}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "address_id",
+									"value": "1",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/api/user/product",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"product"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_user}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"address_id\" : 1,\r\n    \"products\" : [\r\n        {\r\n            \"id\": 3,\r\n            \"qty\" : 1\r\n        },\r\n        {\r\n            \"id\": 1,\r\n            \"qty\" : 1\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/api/user/order",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"order"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Order",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_user}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{api}}/api/user/order",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"order"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Order",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_user}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{api}}/api/user/cancel-order?id=7",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"cancel-order"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "7"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pay Order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_user}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "id",
+									"value": "8",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/api/user/pay-order",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"pay-order"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Delivery",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_user}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "id",
+									"value": "8",
+									"type": "text"
+								},
+								{
+									"key": "reason",
+									"value": "tes",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/api/user/cancel-delivery",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"cancel-delivery"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Supplier",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData=JSON.parse(responseBody);\r",
+									"pm.environment.set(\"token_supplier\", jsonData.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\" : \"rindam@gmail.com\",\r\n    \"name\" : \"rindam\",\r\n    \"password\" : \"12345\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/api/supplier/register",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"api",
+								"supplier",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData=JSON.parse(responseBody);\r",
+									"pm.environment.set(\"token_supplier\", jsonData.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "hanif@gmail.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "12345",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/api/supplier/login",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"api",
+								"supplier",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register Store",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_supplier}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "postal_code",
+									"value": "56512",
+									"type": "text"
+								},
+								{
+									"key": "city",
+									"value": "Magelang",
+									"type": "text"
+								},
+								{
+									"key": "province",
+									"value": "Jawa Tengah",
+									"type": "text"
+								},
+								{
+									"key": "detail",
+									"value": "Santan 1/12 Pabelan Mungkid Magelang",
+									"type": "text"
+								},
+								{
+									"key": "latitude",
+									"value": "-7.574327",
+									"type": "text"
+								},
+								{
+									"key": "longitude",
+									"value": "110.257412",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/api/supplier/store",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"api",
+								"supplier",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Selling Area",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_supplier}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "postal_code",
+									"value": "56530",
+									"type": "text"
+								},
+								{
+									"key": "city",
+									"value": "Sleman",
+									"type": "text"
+								},
+								{
+									"key": "province",
+									"value": "Yogyakarta",
+									"type": "text"
+								},
+								{
+									"key": "detail",
+									"value": "Maguwo 20 Sleman ",
+									"type": "text"
+								},
+								{
+									"key": "latitude",
+									"value": "-7.747740",
+									"type": "text"
+								},
+								{
+									"key": "longitude",
+									"value": "110.419472",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/api/supplier/store-selling-are",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"api",
+								"supplier",
+								"store-selling-are"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Product List",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_supplier}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"products\" : [\r\n        {\r\n            \"id\": 4,\r\n            \"price\": 50000,\r\n            \"is_purchased\" : true\r\n        },\r\n        {\r\n            \"id\": 5,\r\n            \"price\": 50000,\r\n            \"is_purchased\" : true\r\n        }\r\n    ]\r\n        \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/api/supplier/product",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"api",
+								"supplier",
+								"product"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_supplier}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\" : 7,\n    \"name\" : \"Product D\",\n    \"price\" : 50000,\n    \"is_purchased\" : true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/api/supplier/product",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"api",
+								"supplier",
+								"product"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
